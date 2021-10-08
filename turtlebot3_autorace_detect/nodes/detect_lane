@@ -212,18 +212,18 @@ class DetectLane():
 
         how_much_short = 0
 
-        for i in range(0, 600):
+        for i in range(0, 600):     # 600
             if np.count_nonzero(mask[i,::]) > 0:
                 how_much_short += 1
 
-        how_much_short = 600 - how_much_short
+        how_much_short = 600 - how_much_short       # 600
 
-        if how_much_short > 100:
-            if self.reliability_white_line >= 5:
-                self.reliability_white_line -= 5
-        elif how_much_short <= 100:
-            if self.reliability_white_line <= 99:
-                self.reliability_white_line += 5
+        if how_much_short > 100:                     # 100
+            if self.reliability_white_line >= 5:    # 5
+                self.reliability_white_line -= 5    # 5
+        elif how_much_short <= 100:                  # 100
+            if self.reliability_white_line <= 99:   # 99
+                self.reliability_white_line += 5    # 5
 
         msg_white_line_reliability = UInt8()
         msg_white_line_reliability.data = self.reliability_white_line
@@ -273,18 +273,18 @@ class DetectLane():
 
         how_much_short = 0
 
-        for i in range(0, 600):
+        for i in range(0, 600):     # 600
             if np.count_nonzero(mask[i,::]) > 0:
                 how_much_short += 1
         
-        how_much_short = 600 - how_much_short
+        how_much_short = 600 - how_much_short       # 600
 
-        if how_much_short > 100:
-            if self.reliability_yellow_line >= 5:
-                self.reliability_yellow_line -= 5
-        elif how_much_short <= 100:
-            if self.reliability_yellow_line <= 99:
-                self.reliability_yellow_line += 5
+        if how_much_short > 100:                     # 100
+            if self.reliability_yellow_line >= 5:   # 5
+                self.reliability_yellow_line -= 5   # 5
+        elif how_much_short <= 100:                  # 100
+            if self.reliability_yellow_line <= 99:  # 99
+                self.reliability_yellow_line += 5   #5
 
         msg_yellow_line_reliability = UInt8()
         msg_yellow_line_reliability.data = self.reliability_yellow_line
@@ -468,7 +468,7 @@ class DetectLane():
             if self.is_center_x_exist == True:
                 # publishes lane center
                 msg_desired_center = Float64()
-                msg_desired_center.data = centerx.item(350)
+                msg_desired_center.data = centerx.item(350)     # 350
                 self.pub_lane.publish(msg_desired_center)
 
             self.pub_image_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(final, "jpg"))
@@ -477,7 +477,7 @@ class DetectLane():
             if self.is_center_x_exist == True:
                 # publishes lane center
                 msg_desired_center = Float64()
-                msg_desired_center.data = centerx.item(350)
+                msg_desired_center.data = centerx.item(350)     # 350
                 self.pub_lane.publish(msg_desired_center)
 
             self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, "bgr8"))

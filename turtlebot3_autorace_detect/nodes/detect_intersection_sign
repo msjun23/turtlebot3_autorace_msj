@@ -19,6 +19,7 @@
 
 # Author: Leon Jung, Gilbert, Ashe Kim
 
+from pickle import STRING
 import rospy
 import numpy as np
 import os
@@ -33,7 +34,7 @@ class DetectSign():
         self.fnPreproc()
         
         self.sub_image_type = "raw" # you can choose image type "compressed", "raw"
-        self.pub_image_type = "compressed" # you can choose image type "compressed", "raw"
+        self.pub_image_type = "raw" # you can choose image type "compressed", "raw"
 
         #subscribes
         if self.sub_image_type == "compressed":
@@ -59,7 +60,7 @@ class DetectSign():
 
     def fnPreproc(self):
         # Initiate SIFT detector
-        self.sift = cv2.SIFT_create()
+        self.sift = cv2.xfeatures2d.SIFT_create()
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
         dir_path = dir_path.replace('turtlebot3_autorace_detect/nodes', 'turtlebot3_autorace_detect/')
@@ -102,7 +103,7 @@ class DetectSign():
             cv_image_input = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
 
         MIN_MATCH_COUNT = 9 #9
-        MIN_MSE_DECISION = 50000
+        MIN_MSE_DECISION = 50000 #50000
 
         # find the keypoints and descriptors with SIFT
         kp1, des1 = self.sift.detectAndCompute(cv_image_input,None)
@@ -130,8 +131,10 @@ class DetectSign():
                 msg_sign.data = self.TrafficSign.intersection.value
 
                 self.pub_traffic_sign.publish(msg_sign)
-                rospy.loginfo("detect intersection sign")
+                rospy.loginfo("detect intersection sign, mse: %d", mse)
                 image_out_num = 2
+            else:
+                rospy.loginfo("can't detect intersection sign, mse: %d", mse)
 
         good_left = []
         for m,n in matches_left:
@@ -150,9 +153,10 @@ class DetectSign():
                 msg_sign.data = self.TrafficSign.left.value
 
                 self.pub_traffic_sign.publish(msg_sign)
-                rospy.loginfo("detect left sign")
+                rospy.loginfo("detect left sign, mse: %d", mse)
                 image_out_num = 3
-
+            else:
+                rospy.loginfo("left: nothing detected, mse: %d", mse)
         else:
             matches_left = None
             # rospy.loginfo("nothing detected")
@@ -174,9 +178,10 @@ class DetectSign():
                 msg_sign.data = self.TrafficSign.right.value
 
                 self.pub_traffic_sign.publish(msg_sign)
-                rospy.loginfo("detect right sign")
+                rospy.loginfo("detect right sign, mse: %d", mse)
                 image_out_num = 4
-
+            else:
+                rospy.loginfo("right: nothing detected, mse: %d", mse)
         else:
             matches_right = None
             # rospy.loginfo("nothing detected")

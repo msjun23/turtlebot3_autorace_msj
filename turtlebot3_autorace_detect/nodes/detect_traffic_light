@@ -56,8 +56,8 @@ class DetectTrafficLight():
         if self.is_calibration_mode == True:
             srv_detect_lane = Server(DetectTrafficLightParamsConfig, self.cbGetDetectTrafficLightParam)
 
-        self.sub_image_type = "compressed"          # "compressed" / "raw"
-        self.pub_image_type = "compressed"          # "compressed" / "raw"
+        self.sub_image_type = "raw"          # "compressed" / "raw"
+        self.pub_image_type = "raw"          # "compressed" / "raw"
 
         self.counter = 1
         
