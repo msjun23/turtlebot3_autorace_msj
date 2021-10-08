@@ -1,5 +1,19 @@
-# TurtleBot3 AutoRace 2020 metapackage 
+# TurtleBot3 AutoRace for BARAM by msj
+---
+## 2021 Turtlebot Autorace
 
+ROS version: __Melodic__
+
+cam: Microsoft Lifecam HD-3000
+
+cam package: [usb_cam](https://github.com/ros-drivers/usb_cam)
+> Install this package at your turtlebot
+> ```ssh
+> $ rosrun usb_cam usb_cam_node
+> ```
+>
+
+---
 [![noetic-devel Status](https://github.com/ROBOTIS-GIT/turtlebot3_autorace_2020/workflows/Noetic/badge.svg)](https://github.com/ROBOTIS-GIT/turtlebot3_autorace_2020/tree/noetic-devel)
 
 ## Simulation (ROS 1 Noetic)
