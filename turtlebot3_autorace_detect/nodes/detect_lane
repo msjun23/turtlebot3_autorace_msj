@@ -18,6 +18,8 @@
 ################################################################################
 
 # Authors: Leon Jung, Gilbert, Ashe Kim, Special Thanks : Roger Sacchelli
+# 2nd Author: Seokjun Moon
+# For Turtlebot3 AutoRace 2021
 
 import rospy
 import numpy as np
@@ -48,22 +50,11 @@ class DetectLane():
         if self.is_calibration_mode == True:
             srv_detect_lane = Server(DetectLaneParamsConfig, self.cbGetDetectLaneParam)
 
-        self.sub_image_type = "raw"         # you can choose image type "compressed", "raw"
-        self.pub_image_type = "compressed"  # you can choose image type "compressed", "raw"
+        # subscribes raw image
+        self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbFindLane, queue_size = 1)
 
-        if self.sub_image_type == "compressed":
-            # subscribes compressed image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input/compressed', CompressedImage, self.cbFindLane, queue_size = 1)
-        elif self.sub_image_type == "raw":
-            # subscribes raw image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbFindLane, queue_size = 1)
-
-        if self.pub_image_type == "compressed":
-            # publishes lane image in compressed type 
-            self.pub_image_lane = rospy.Publisher('/detect/image_output/compressed', CompressedImage, queue_size = 1)
-        elif self.pub_image_type == "raw":
-            # publishes lane image in raw type
-            self.pub_image_lane = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
+        # publishes lane image in raw type
+        self.pub_image_lane = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
 
         if self.is_calibration_mode == True:
             if self.pub_image_type == "compressed":
@@ -134,12 +125,7 @@ class DetectLane():
         else:
             self.counter = 1
 
-        if self.sub_image_type == "compressed":
-            #converting compressed image to opencv image
-            np_arr = np.frombuffer(image_msg.data, np.uint8)
-            cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        elif self.sub_image_type == "raw":
-            cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
+        cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
 
         # find White and Yellow Lanes
         white_fraction, cv_white_lane = self.maskWhiteLane(cv_image)
@@ -212,31 +198,26 @@ class DetectLane():
 
         how_much_short = 0
 
-        for i in range(0, 600):     # 600
+        for i in range(0, 600):
             if np.count_nonzero(mask[i,::]) > 0:
                 how_much_short += 1
 
-        how_much_short = 600 - how_much_short       # 600
+        how_much_short = 600 - how_much_short
 
-        if how_much_short > 100:                     # 100
-            if self.reliability_white_line >= 5:    # 5
-                self.reliability_white_line -= 5    # 5
-        elif how_much_short <= 100:                  # 100
-            if self.reliability_white_line <= 99:   # 99
-                self.reliability_white_line += 5    # 5
+        if how_much_short > 100:
+            if self.reliability_white_line >= 5:
+                self.reliability_white_line -= 5
+        elif how_much_short <= 100:
+            if self.reliability_white_line <= 99:
+                self.reliability_white_line += 5
 
         msg_white_line_reliability = UInt8()
         msg_white_line_reliability.data = self.reliability_white_line
         self.pub_white_line_reliability.publish(msg_white_line_reliability)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes white lane filtered image in compressed type
-                self.pub_image_white_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes white lane filtered image in raw type
-                self.pub_image_white_lane.publish(self.cvBridge.cv2_to_imgmsg(mask, "bgr8"))
+            # publishes white lane filtered image in raw type
+            self.pub_image_white_lane.publish(self.cvBridge.cv2_to_imgmsg(mask, "bgr8"))
 
         return fraction_num, mask
 
@@ -273,31 +254,26 @@ class DetectLane():
 
         how_much_short = 0
 
-        for i in range(0, 600):     # 600
+        for i in range(0, 600):
             if np.count_nonzero(mask[i,::]) > 0:
                 how_much_short += 1
         
-        how_much_short = 600 - how_much_short       # 600
+        how_much_short = 600 - how_much_short
 
-        if how_much_short > 100:                     # 100
-            if self.reliability_yellow_line >= 5:   # 5
-                self.reliability_yellow_line -= 5   # 5
-        elif how_much_short <= 100:                  # 100
-            if self.reliability_yellow_line <= 99:  # 99
-                self.reliability_yellow_line += 5   #5
+        if how_much_short > 100:
+            if self.reliability_yellow_line >= 5:
+                self.reliability_yellow_line -= 5
+        elif how_much_short <= 100:
+            if self.reliability_yellow_line <= 99:
+                self.reliability_yellow_line += 5
 
         msg_yellow_line_reliability = UInt8()
         msg_yellow_line_reliability.data = self.reliability_yellow_line
         self.pub_yellow_line_reliability.publish(msg_yellow_line_reliability)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes yellow lane filtered image in compressed type
-                self.pub_image_yellow_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes yellow lane filtered image in raw type
-                self.pub_image_yellow_lane.publish(self.cvBridge.cv2_to_imgmsg(mask, "bgr8"))
+            # publishes yellow lane filtered image in raw type
+            self.pub_image_yellow_lane.publish(self.cvBridge.cv2_to_imgmsg(mask, "bgr8"))
 
         return fraction_num, mask
 
@@ -464,23 +440,13 @@ class DetectLane():
         final = cv2.addWeighted(cv_image, 1, color_warp, 0.2, 0)
         final = cv2.addWeighted(final, 1, color_warp_lines, 1, 0)
 
-        if self.pub_image_type == "compressed":
-            if self.is_center_x_exist == True:
-                # publishes lane center
-                msg_desired_center = Float64()
-                msg_desired_center.data = centerx.item(350)     # 350
-                self.pub_lane.publish(msg_desired_center)
+        if self.is_center_x_exist == True:
+            # publishes lane center
+            msg_desired_center = Float64()
+            msg_desired_center.data = centerx.item(350)
+            self.pub_lane.publish(msg_desired_center)
 
-            self.pub_image_lane.publish(self.cvBridge.cv2_to_compressed_imgmsg(final, "jpg"))
-
-        elif self.pub_image_type == "raw":
-            if self.is_center_x_exist == True:
-                # publishes lane center
-                msg_desired_center = Float64()
-                msg_desired_center.data = centerx.item(350)     # 350
-                self.pub_lane.publish(msg_desired_center)
-
-            self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, "bgr8"))
+        self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, "bgr8"))
 
     def main(self):
         rospy.spin()

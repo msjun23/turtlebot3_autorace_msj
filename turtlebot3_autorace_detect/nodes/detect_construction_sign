@@ -18,6 +18,8 @@
 ################################################################################
 
 # Author: Leon Jung, Gilbert, Ashe Kim
+# 2nd Author: Seokjun Moon
+# For Turtlebot3 AutoRace 2021
 
 import rospy
 import numpy as np
@@ -32,26 +34,14 @@ class DetectSign():
     def __init__(self):
         self.fnPreproc()
         
-        self.sub_image_type = "raw" # you can choose image type "compressed", "raw"
-        self.pub_image_type = "compressed" # you can choose image type "compressed", "raw"
-
-        #subscribes
-        if self.sub_image_type == "compressed":
-            # subscribes compressed image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input/compressed', CompressedImage, self.cbFindTrafficSign, queue_size = 1)
-        elif self.sub_image_type == "raw":
-            # subscribes raw image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbFindTrafficSign, queue_size = 1)
+        # subscribes raw image
+        self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbFindTrafficSign, queue_size = 1)
 
         # publishes
         self.pub_traffic_sign = rospy.Publisher('/detect/traffic_sign', UInt8, queue_size=1)
         
-        if self.pub_image_type == "compressed":
-            # publishes traffic sign image in compressed type 
-            self.pub_image_traffic_sign = rospy.Publisher('/detect/image_output/compressed', CompressedImage, queue_size = 1)
-        elif self.pub_image_type == "raw":
-            # publishes traffic sign image in raw type
-            self.pub_image_traffic_sign = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
+        # publishes traffic sign image in raw type
+        self.pub_image_traffic_sign = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
 
         self.cvBridge = CvBridge()
         self.TrafficSign = Enum('TrafficSign', 'construction')
@@ -59,7 +49,7 @@ class DetectSign():
 
     def fnPreproc(self):
         # Initiate SIFT detector
-        self.sift = cv2.SIFT_create()
+        self.sift = cv2.xfeatures2d.SIFT_create()
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
         dir_path = dir_path.replace('turtlebot3_autorace_detect/nodes', 'turtlebot3_autorace_detect/')
@@ -89,14 +79,9 @@ class DetectSign():
         else:
             self.counter = 1
 
-        if self.sub_image_type == "compressed":
-            #converting compressed image to opencv image
-            np_arr = np.frombuffer(image_msg.data, np.uint8)
-            cv_image_input = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        elif self.sub_image_type == "raw":
-            cv_image_input = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
+        cv_image_input = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
 
-        MIN_MATCH_COUNT = 8 #9
+        MIN_MATCH_COUNT = 9 #9
         MIN_MSE_DECISION = 50000
 
         # find the keypoints and descriptors with SIFT
@@ -129,16 +114,13 @@ class DetectSign():
         else:
             matches_construction = None
             rospy.loginfo("not found")
-      
+
+        # nothing detected
         if image_out_num == 1:
-            if self.pub_image_type == "compressed":
-                # publishes traffic sign image in compressed type
-                self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_compressed_imgmsg(cv_image_input, "jpg"))
+            # publishes traffic sign image in raw type
+            self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
 
-            elif self.pub_image_type == "raw":
-                # publishes traffic sign image in raw type
-                self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
-
+        # construction sign is detected
         elif image_out_num == 2:
             draw_params_construction = dict(matchColor = (255,0,0), # draw matches in green color
                         singlePointColor = None,
@@ -147,13 +129,8 @@ class DetectSign():
 
             final_construction = cv2.drawMatches(cv_image_input,kp1,self.img_construction,self.kp_construction,good_construction,None,**draw_params_construction)
 
-            if self.pub_image_type == "compressed":
-                # publishes traffic sign image in compressed type
-                self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_compressed_imgmsg(final_construction, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes traffic sign image in raw type
-                self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(final_construction, "bgr8"))
+            # publishes traffic sign image in raw type
+            self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(final_construction, "bgr8"))
 
     def main(self):
         rospy.spin()
@@ -162,22 +139,3 @@ if __name__ == '__main__':
     rospy.init_node('detect_sign')
     node = DetectSign()
     node.main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
