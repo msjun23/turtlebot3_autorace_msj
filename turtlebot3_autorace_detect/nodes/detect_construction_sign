@@ -29,9 +29,20 @@ from enum import Enum
 from std_msgs.msg import UInt8
 from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg import String
 
 class DetectSign():
     def __init__(self):
+        # subscribes start flag
+        while True:
+            msg = rospy.wait_for_message('pub_next_mission', String, timeout=None)
+            if (msg.data == 'construction'):
+                break
+
+        rospy.loginfo("Start detecting construction sign")
+        rospy.Subscriber('pub_next_mission', String, self.SubMission, queue_size=1)
+
+
         self.fnPreproc()
         
         # subscribes raw image
@@ -63,6 +74,11 @@ class DetectSign():
         search_params = dict(checks = 50)
 
         self.flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+    def SubMission(self, data):
+        if (data.data != 'construction'):
+            rospy.loginfo("Contruction Mission is cleared")
+            rospy.signal_shutdown("Contruction Mission is cleared")
 
     def fnCalcMSE(self, arr1, arr2):
             squared_diff = (arr1 - arr2) ** 2
@@ -113,7 +129,7 @@ class DetectSign():
                 image_out_num = 2
         else:
             matches_construction = None
-            rospy.loginfo("not found")
+            #rospy.loginfo("not found")
 
         # nothing detected
         if image_out_num == 1:

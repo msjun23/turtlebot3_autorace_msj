@@ -56,37 +56,17 @@ class DetectTrafficLight():
         if self.is_calibration_mode == True:
             srv_detect_lane = Server(DetectTrafficLightParamsConfig, self.cbGetDetectTrafficLightParam)
 
-        self.sub_image_type = "raw"          # "compressed" / "raw"
-        self.pub_image_type = "raw"          # "compressed" / "raw"
-
-        self.counter = 1
-        
-        if self.sub_image_type == "compressed":
-            # subscribes compressed image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input/compressed', CompressedImage, self.cbGetImage, queue_size = 1)
-        elif self.sub_image_type == "raw":
-            # subscribes raw image
-            self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbGetImage, queue_size = 1)
+        # subscribes raw image
+        self.sub_image_original = rospy.Subscriber('/detect/image_input', Image, self.cbGetImage, queue_size = 1)
  
-        if self.pub_image_type == "compressed":
-            # publishes compensated image in compressed type 
-            self.pub_image_traffic_light = rospy.Publisher('/detect/image_output/compressed', CompressedImage, queue_size = 1)
-        elif self.pub_image_type == "raw":
-            # publishes compensated image in raw type
-            self.pub_image_traffic_light = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
+        # publishes compensated image in raw type
+        self.pub_image_traffic_light = rospy.Publisher('/detect/image_output', Image, queue_size = 1)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes light image in compressed type 
-                self.pub_image_red_light = rospy.Publisher('/detect/image_output_sub1/compressed', CompressedImage, queue_size = 1)
-                self.pub_image_yellow_light = rospy.Publisher('/detect/image_output_sub2/compressed', CompressedImage, queue_size = 1)
-                self.pub_image_green_light = rospy.Publisher('/detect/image_output_sub3/compressed', CompressedImage, queue_size = 1)
-            elif self.pub_image_type == "raw":
-                # publishes light image in raw type
-                self.pub_image_red_light = rospy.Publisher('/detect/image_output_sub1', Image, queue_size = 1)
-                self.pub_image_yellow_light = rospy.Publisher('/detect/image_output_sub2', Image, queue_size = 1)
-                self.pub_image_green_light = rospy.Publisher('/detect/image_output_sub3', Image, queue_size = 1)
-
+            # publishes light image in raw type
+            self.pub_image_red_light = rospy.Publisher('/detect/image_output_sub1', Image, queue_size = 1)
+            self.pub_image_yellow_light = rospy.Publisher('/detect/image_output_sub2', Image, queue_size = 1)
+            self.pub_image_green_light = rospy.Publisher('/detect/image_output_sub3', Image, queue_size = 1)
 
         self.sub_traffic_light_finished = rospy.Subscriber('/control/traffic_light_finished', UInt8, self.cbTrafficLightFinished, queue_size = 1)
 
@@ -163,7 +143,6 @@ class DetectTrafficLight():
 
         return config
 
-
     def cbGetImage(self, image_msg):
         # drop the frame to 1/5 (6fps) because of the processing speed. This is up to your computer's operating power.
         if self.counter % 3 != 0:
@@ -172,11 +151,7 @@ class DetectTrafficLight():
         else:
             self.counter = 1
 
-        if self.sub_image_type == "compressed":
-            np_arr = np.frombuffer(image_msg.data, np.uint8)
-            self.cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        else:
-            self.cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
+        self.cv_image = self.cvBridge.imgmsg_to_cv2(image_msg, "bgr8")
 
         self.is_image_available = True
 
@@ -225,7 +200,6 @@ class DetectTrafficLight():
             self.pub_traffic_light.publish(msg_sign)
             self.is_traffic_light_finished = True
             
-
         if self.yellow_count >= 3:
             rospy.loginfo("YELLOW")
             cv2.putText(self.cv_image,"YELLOW", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 255))
@@ -239,13 +213,8 @@ class DetectTrafficLight():
             self.off_traffic = True
             cv2.putText(self.cv_image,"STOP", (self.point_col, self.point_low), cv2.FONT_HERSHEY_DUPLEX, 0.5, (0, 0, 255))
 
-        if self.pub_image_type == "compressed":
-            # publishes traffic light image in compressed type
-            self.pub_image_traffic_light.publish(self.cvBridge.cv2_to_compressed_imgmsg(self.cv_image, "jpg"))
-
-        elif self.pub_image_type == "raw":
-            # publishes traffic light image in raw type
-            self.pub_image_traffic_light.publish(self.cvBridge.cv2_to_imgmsg(self.cv_image, "bgr8"))
+        # publishes traffic light image in raw type
+        self.pub_image_traffic_light.publish(self.cvBridge.cv2_to_imgmsg(self.cv_image, "bgr8"))
 
     def fnMaskRedTrafficLight(self):
         image = np.copy(self.cv_image)
@@ -271,13 +240,8 @@ class DetectTrafficLight():
         res = cv2.bitwise_and(image, image, mask = mask)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes red light filtered image in compressed type
-                self.pub_image_red_light.publish(self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes red light filtered image in raw type
-                self.pub_image_red_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
+            # publishes red light filtered image in raw type
+            self.pub_image_red_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
 
         mask = cv2.bitwise_not(mask)
 
@@ -307,13 +271,8 @@ class DetectTrafficLight():
         res = cv2.bitwise_and(image, image, mask = mask)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes yellow light filtered image in compressed type
-                self.pub_image_yellow_light.publish(self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes yellow light filtered image in raw type
-                self.pub_image_yellow_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
+            # publishes yellow light filtered image in raw type
+            self.pub_image_yellow_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
 
         mask = cv2.bitwise_not(mask)
 
@@ -343,13 +302,8 @@ class DetectTrafficLight():
         res = cv2.bitwise_and(image, image, mask = mask)
 
         if self.is_calibration_mode == True:
-            if self.pub_image_type == "compressed":
-                # publishes green light filtered image in compressed type
-                self.pub_image_green_light.publish(self.cvBridge.cv2_to_compressed_imgmsg(mask, "jpg"))
-
-            elif self.pub_image_type == "raw":
-                # publishes green light filtered image in raw type
-                self.pub_image_green_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
+            # publishes green light filtered image in raw type
+            self.pub_image_green_light.publish(self.cvBridge.cv2_to_imgmsg(mask, "mono8"))
 
         mask = cv2.bitwise_not(mask)
 

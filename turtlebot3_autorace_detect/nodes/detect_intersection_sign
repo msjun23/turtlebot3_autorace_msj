@@ -22,17 +22,28 @@
 # For Turtlebot3 AutoRace 2021
 
 from pickle import STRING
+import time
 import rospy
 import numpy as np
 import os
 import cv2
 from enum import Enum
-from std_msgs.msg import UInt8
+from std_msgs.msg import UInt8, String
 from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 
 class DetectSign():
     def __init__(self):
+        # subscribes flag
+        while True:
+            msg = rospy.wait_for_message('pub_next_mission', String, timeout=None)
+            if (msg.data == 'intersection'):
+                break
+
+        rospy.loginfo("Start detecting intersection sign")
+        rospy.Subscriber('pub_next_mission', String, self.SubMission, queue_size=1)
+
+        # Start
         self.fnPreproc()
 
         # subscribes raw image
@@ -47,6 +58,11 @@ class DetectSign():
         self.cvBridge = CvBridge()
         self.TrafficSign = Enum('TrafficSign', 'intersection left right')
         self.counter = 1
+
+    def SubMission(self, data):
+        if (data.data != 'intersection'):
+            rospy.loginfo("Intersection Mission is cleared")
+            rospy.signal_shutdown("Intersection Mission is cleared")
 
     def fnPreproc(self):
         # Initiate SIFT detector
@@ -118,8 +134,8 @@ class DetectSign():
                 self.pub_traffic_sign.publish(msg_sign)
                 rospy.loginfo("detect intersection sign, mse: %d", mse)
                 image_out_num = 2
-            else:
-                rospy.loginfo("can't detect intersection sign, mse: %d", mse)
+            # else:
+            #     rospy.loginfo("can't detect intersection sign, mse: %d", mse)
 
         good_left = []
         for m,n in matches_left:
@@ -140,8 +156,8 @@ class DetectSign():
                 self.pub_traffic_sign.publish(msg_sign)
                 rospy.loginfo("detect left sign, mse: %d", mse)
                 image_out_num = 3
-            else:
-                rospy.loginfo("left: nothing detected, mse: %d", mse)
+            # else:
+            #     rospy.loginfo("left: nothing detected, mse: %d", mse)
         else:
             matches_left = None
             # rospy.loginfo("nothing detected")
@@ -165,8 +181,8 @@ class DetectSign():
                 self.pub_traffic_sign.publish(msg_sign)
                 rospy.loginfo("detect right sign, mse: %d", mse)
                 image_out_num = 4
-            else:
-                rospy.loginfo("right: nothing detected, mse: %d", mse)
+            # else:
+            #     rospy.loginfo("right: nothing detected, mse: %d", mse)
         else:
             matches_right = None
             # rospy.loginfo("nothing detected")
