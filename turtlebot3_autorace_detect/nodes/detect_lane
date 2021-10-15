@@ -31,6 +31,9 @@ from dynamic_reconfigure.server import Server
 from turtlebot3_autorace_detect.cfg import DetectLaneParamsConfig
 
 class DetectLane():
+    prev_ros_time = 0.0
+    ros_time = 0.0
+
     def __init__(self):
         self.hue_white_l = rospy.get_param("~detect/lane/white/hue_l", 0)
         self.hue_white_h = rospy.get_param("~detect/lane/white/hue_h", 179)
@@ -447,6 +450,11 @@ class DetectLane():
             self.pub_lane.publish(msg_desired_center)
 
         self.pub_image_lane.publish(self.cvBridge.cv2_to_imgmsg(final, "bgr8"))
+        
+        # frame check
+        # self.ros_time = rospy.get_time()
+        # rospy.loginfo(1 / (self.ros_time - self.prev_ros_time))
+        # self.prev_ros_time = self.ros_time
 
     def main(self):
         rospy.spin()
