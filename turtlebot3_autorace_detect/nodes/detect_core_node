@@ -76,13 +76,13 @@ class DetectSign():
         self.img_construction  = cv2.imread(dir_path + 'construction.png',0)
         self.kp_construction, self.des_construction  = self.sift.detectAndCompute(self.img_construction, None)
 
-        self.img_parking = cv2.imread(dir_path + 'parking.png',0)      # trainImage2   
+        self.img_parking = cv2.imread(dir_path + 'parking.png',0)
         self.kp_parking, self.des_parking = self.sift.detectAndCompute(self.img_parking,None)
 
-        self.img_stop = cv2.imread(dir_path + 'stop.png',0)         # trainImage1
+        self.img_stop = cv2.imread(dir_path + 'stop.png',0)
         self.kp_stop, self.des_stop = self.sift.detectAndCompute(self.img_stop,None)
 
-        self.img_tunnel = cv2.imread(dir_path + 'tunnel.png',0)       # trainImage3
+        self.img_tunnel = cv2.imread(dir_path + 'tunnel.png',0)
         self.kp_tunnel, self.des_tunnel = self.sift.detectAndCompute(self.img_tunnel,None)
 
         FLANN_INDEX_KDTREE = 0
