@@ -23,7 +23,7 @@
 
 from pickle import STRING
 import time
-import rospy
+import rospy, roslaunch
 import numpy as np
 import os
 import cv2
@@ -198,7 +198,6 @@ class DetectSign():
                 # publishes traffic sign image in raw type
                 self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
                 self.cnt = 0
-
             # detect intersection sign
             elif image_out_num == 2:
                 draw_params_intersection = dict(matchColor = (255,0,0), # draw matches in green color
@@ -213,9 +212,8 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Intersection")
+                    self.pub_mission.publish("intersection")
                     self.cnt = 0
-
             # detect left sign
             elif image_out_num == 3:
                 draw_params_left = dict(matchColor = (255,0,0), # draw matches in green color
@@ -230,10 +228,9 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Left")
+                    self.pub_mission.publish("left")
                     self.cnt = 0
                     self.mission_num += 1
-
             # detect right sign
             elif image_out_num == 4:
                 draw_params_right = dict(matchColor = (255,0,0), # draw matches in green color
@@ -248,9 +245,10 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Intersection")
+                    self.pub_mission.publish("right")
                     self.cnt = 0
                     self.mission_num += 1
+
         elif (self.mission_list[self.mission_num] == "construction"):
             # drop the frame to 1/5 (6fps) because of the processing speed. This is up to your computer's operating power.
             if self.counter % 3 != 0:
@@ -299,7 +297,7 @@ class DetectSign():
             if image_out_num == 1:
                 # publishes traffic sign image in raw type
                 self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
-
+                self.cnt = 0
             # construction sign is detected
             elif image_out_num == 2:
                 draw_params_construction = dict(matchColor = (255,0,0), # draw matches in green color
@@ -314,9 +312,10 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Construction")
+                    self.pub_mission.publish("construction")
                     self.cnt = 0
                     self.mission_num += 1
+
         elif (self.mission_list[self.mission_num] == "parking"):
             # drop the frame to 1/5 (6fps) because of the processing speed. This is up to your computer's operating power.
             if self.counter % 3 != 0:
@@ -365,7 +364,7 @@ class DetectSign():
             if image_out_num == 1:
                 # publishes traffic sign image in raw type
                 self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
-
+                self.cnt = 0
             # parking sign is detected
             elif image_out_num == 2:
                 draw_params_parking = dict(matchColor = (255,0,0), # draw matches in green color
@@ -380,9 +379,10 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Parking")
+                    self.pub_mission.publish("parking")
                     self.cnt = 0
                     self.mission_num += 1
+
         elif (self.mission_list[self.mission_num] == "level_crossing"):
             # drop the frame to 1/5 (6fps) because of the processing speed. This is up to your computer's operating power.
             if self.counter % 3 != 0:
@@ -432,7 +432,7 @@ class DetectSign():
             if image_out_num == 1:
                 # publishes traffic sign image in raw type
                 self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
-
+                self.cnt = 0
             # stop sign is detected
             elif image_out_num == 2:
                 draw_params_level_crossing = dict(matchColor = (255,0,0), # draw matches in green color
@@ -447,9 +447,10 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("LevelCrossing")
+                    self.pub_mission.publish("level_crossing")
                     self.cnt = 0
                     self.mission_num += 1
+
         elif (self.mission_list[self.mission_num] == "tunnel"):
             # drop the frame to 1/5 (6fps) because of the processing speed. This is up to your computer's operating power.
             if self.counter % 3 != 0:
@@ -497,7 +498,7 @@ class DetectSign():
             if image_out_num == 1:
                 # publishes traffic sign image in raw type
                 self.pub_image_traffic_sign.publish(self.cvBridge.cv2_to_imgmsg(cv_image_input, "bgr8"))
-
+                self.cnt = 0
             # tunnel sign is detected
             elif image_out_num == 2:
                 draw_params_tunnel = dict(matchColor = (255,0,0), # draw matches in green color
@@ -512,9 +513,12 @@ class DetectSign():
 
                 self.cnt += 1
                 if (self.cnt == 5):
-                    self.pub_mission.publish("Tunnel")
+                    self.pub_mission.publish("tunnel")
                     self.cnt = 0
                     self.mission_num += 1
+
+                    # roslaunch.core.Node('tunnel_moving', 'control_tunnel')
+
         else:
             rospy.loginfo("All Mission is Cleared!")
 

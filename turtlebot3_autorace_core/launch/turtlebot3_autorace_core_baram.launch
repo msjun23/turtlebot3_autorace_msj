@@ -6,7 +6,7 @@
     <node pkg="turtlebot3_autorace_camera" type="image_projection" name="image_projection" output="screen">
       <rosparam command="load" file="$(find turtlebot3_autorace_camera)/calibration/extrinsic_calibration/projection.yaml" />
       <param if="$(eval mode == 'calibration')" name="/is_extrinsic_camera_calibration_mode" value="True"/>
-      <param if="$(eval mode == 'action')" name="/is_extrinsic_camera_calibration_mode" value="False"/>    
+      <param if="$(eval mode == 'action')" name="/is_extrinsic_camera_calibration_mode" value="False"/>
       <remap from="/camera/image_input" to="/camera/image_raw" />
       <remap from="/camera/image_output" to="/camera/image_projected" />
     </node>
@@ -28,5 +28,8 @@
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
   </node>
+
+  <!-- tunnel control -->
+  <node pkg="tunnel_moving" type="control_tunnel" name="control_tunnel" output="screen"> </node>
 
 </launch>

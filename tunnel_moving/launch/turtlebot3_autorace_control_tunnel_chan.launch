@@ -1,6 +1,4 @@
 <launch>
-  <!-- launch turtlebot3_autorace_detect_tunnel_chan.launch before launch this file -->
-
   <!-- tunnel control -->
   <node pkg="tunnel_moving" type="control_tunnel" name="control_tunnel" output="screen"> </node>
 </launch>
