@@ -14,36 +14,42 @@
   </node>
 
   <!-- intersection sign detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_intersection_sign" name="detect_intersection_sign" output="screen">
+  <!-- <node pkg="turtlebot3_autorace_detect" type="detect_intersection_sign" name="detect_intersection_sign" output="screen">
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
-  </node>
+  </node> -->
 
   <!-- construction sign detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_construction_sign" name="detect_construction_sign" output="screen">
+  <!-- <node pkg="turtlebot3_autorace_detect" type="detect_construction_sign" name="detect_construction_sign" output="screen">
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
-  </node>
+  </node> -->
 
   <!-- parking sign detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_parking_sign" name="detect_parking_sign" output="screen">
+  <!-- <node pkg="turtlebot3_autorace_detect" type="detect_parking_sign" name="detect_parking_sign" output="screen">
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
-  </node>
+  </node> -->
 
   <!-- level_crossing sign detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_level_crossing_sign" name="detect_level_crossing_sign" output="screen">
+  <!-- <node pkg="turtlebot3_autorace_detect" type="detect_level_crossing_sign" name="detect_level_crossing_sign" output="screen">
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
-  </node>
+  </node> -->
 
   <!-- tunnel sign detection -->
-  <node pkg="turtlebot3_autorace_detect" type="detect_tunnel_sign" name="detect_tunnel_sign" output="screen">
+  <!-- <node pkg="turtlebot3_autorace_detect" type="detect_tunnel_sign" name="detect_tunnel_sign" output="screen">
+    <remap from="/detect/image_input" to="/camera/image_raw" />
+    <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
+  </node> -->
+
+  <!-- Mission -->
+  <!-- <node pkg="turtlebot3_autorace_detect" type="pub_next_mission" name="pub_next_mission" output="screen"> </node> -->
+
+  <!-- One scripts -->
+  <node pkg="turtlebot3_autorace_detect" type="detect_core_node" name="detect_core_node" output="screen">
     <remap from="/detect/image_input" to="/camera/image_raw" />
     <remap from="/detect/image_output" to="/detect/image_traffic_sign" />
   </node>
-
-  <!-- Mission -->
-  <node pkg="turtlebot3_autorace_detect" type="pub_next_mission" name="pub_next_mission" output="screen"> </node>
   
 </launch>

@@ -57,6 +57,7 @@ catkin_install_python(PROGRAMS
   nodes/detect_tunnel
   nodes/detect_tunnel_sign
   nodes/pub_next_mission
+  nodes/detect_core_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
