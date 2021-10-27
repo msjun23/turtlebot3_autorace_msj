@@ -74,11 +74,11 @@ class ImageProjection():
         cv_image_homography = cv2.warpPerspective(cv_image_original, h, (1000, 600))
 
         # fill the empty space with black triangles on left and right side of bottom
-        triangle1 = np.array([[0, 599], [0, 340], [200, 599]], np.int32)
-        triangle2 = np.array([[999, 599], [999, 340], [799, 599]], np.int32)
-        black = (0, 0, 0)
-        white = (255, 255, 255)
-        cv_image_homography = cv2.fillPoly(cv_image_homography, [triangle1, triangle2], black)
+        # triangle1 = np.array([[0, 599], [0, 340], [200, 599]], np.int32)
+        # triangle2 = np.array([[999, 599], [999, 340], [799, 599]], np.int32)
+        # black = (0, 0, 0)
+        # white = (255, 255, 255)
+        # cv_image_homography = cv2.fillPoly(cv_image_homography, [triangle1, triangle2], black)
         
         # publishes ground-project image in raw type
         self.pub_image_projected.publish(self.cvBridge.cv2_to_imgmsg(cv_image_homography, "bgr8"))

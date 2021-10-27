@@ -84,11 +84,11 @@ namespace chan {
 
 
 	pair<double, double> darkroom::print() {
-		assert(!map.empty());
+		//assert(!map.empty());
 		//dilate(this->map, this->map, cv::Mat(), cv::Point(-1, -1), 5);
 		//erode(this->map, this->map, cv::Mat(), cv::Point(-1, -1), 5);
 
-		double deg = window();
+		double deg = window() * 8;
 		double vel = 0.1;
 		resize(this->map, this->map, Size(500, 500), 0, 0, INTER_LINEAR);
 		
